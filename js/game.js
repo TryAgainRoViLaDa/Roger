@@ -1,7 +1,7 @@
 var config = {
     type: Phaser.AUTO,
     width:600,
-    height:600,
+    height:400,
     physics:{
         default:'arcade',
         arcade:{
@@ -24,6 +24,19 @@ var comida=0;
 var direccion1=1;
 var direccion2=1;
 
+var cd=0;
+var cd2=100;
+var mensaje=0;
+var scorecd=0;
+var final=20;
+var inicio=0;
+var cd3=0;
+var cd4=0;
+
+var dirfle=1;
+
+var finalconversacion=true;
+
 function preload() {
 
     this.load.image('gameTiles', 'tileset/NatureTileset.png');
@@ -41,6 +54,14 @@ function preload() {
     this.load.image('chuleta', 'assets/chuleta.png');  
 
     this.load.image('boss', 'assets/boss.png');
+
+    this.load.image('disparo', 'assets/flecha.png');
+
+    this.load.image('texto', 'assets/bafarada1.png');
+
+    this.load.image('texto2', 'assets/bafarada2.png');
+
+    this.load.image('ayudante', 'assets/ayudante.png');
 
 
 }
@@ -62,6 +83,7 @@ function create() {
     KeyS=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     ATTACK=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     KeyE=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    DISPARAR=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
 
     player = this.physics.add.sprite(100,100, 'attack').setScale(0.08);
 
@@ -93,7 +115,7 @@ function create() {
     cerdo2 = this.physics.add.sprite(420,170,'cerdo').setScale(0.1);
     this.physics.add.overlap(player, cerdo2, ataque2, null, this);
 
-    boss = this.physics.add.sprite(1500,2000,'boss').setScale(0.8);
+    boss = this.physics.add.sprite(1300,2000,'boss').setScale(0.8);
     this.physics.add.overlap(player, boss, ataque1, null, this);
 
     this.cameras.main.setBounds(0, 0, 1280 * 2, 1280 * 2);
@@ -104,18 +126,30 @@ function create() {
     chuleta = this.add.sprite(595,40, 'chuleta').setScale(0.3);
     scoreText1 = this.add.text(605, 45,+ chuleta, { fontSize: '20px', fill: 'white' });
 
+    ayudante = this.physics.add.sprite(1800,1800, 'ayudante');
+    ayudante.setScale(0.2);
+
+    this.physics.add.overlap(player, ayudante, interaccion, null, this);
+    this.physics.add.overlap(player, ayudante, hablar, null, this);
+    this.physics.add.overlap(player, ayudante, pasar, null, this);
+
     this.physics.add.collider(player, obstaculos);
 }
 
 function update()
 {
+    if(cd4>0)
+    {
+      cd4=cd4-1;
+    }
+  
     if (KeyA.isDown)
     {
-        player.setVelocityX(-400);
+        player.setVelocityX(-200);
     }
     else if(KeyD.isDown)
     {
-        player.setVelocityX(400);
+        player.setVelocityX(200);
     }
     else
     {
@@ -124,11 +158,11 @@ function update()
 
     if (KeyW.isDown)
     {
-        player.setVelocityY(-400);
+        player.setVelocityY(-200);
     }
     else if (KeyS.isDown)
     {
-        player.setVelocityY(400);
+        player.setVelocityY(200);
     }
     else
     {
@@ -136,15 +170,97 @@ function update()
     }
 
 
-     if (ATTACK.isDown)
+    if (ATTACK.isDown)
     {
         player.play('attack');
     }
+
+    if (ATTACK.isDown && finalconversacion==false)
+    {
+        final=final-1;
+        if (ATTACK.isDown && final<=0 )
+        {
+            destruir();
+            final=10;
+        }
+    } 
+
+	if (DISPARAR.isDown & cd4==0)
+	{
+    
+
+     if (KeyA.isDown )
+    {
+       disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
+       disparo.angle=230;
+       disparo.setVelocityX(-400);
+       cd4=150;
+    }
+    else if(KeyD.isDown)
+    {
+      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
+      disparo.angle=50;
+        disparo.setVelocityX(400);
+        cd4=150;
+    }
+  
+   else if (KeyW.isDown)
+    {
+      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
+        disparo.setVelocityY(-400);
+        cd4=150;
+    }
+    else if (KeyS.isDown)
+    {
+      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
+        disparo.setVelocityY(400);
+        cd4=150;
+    }
+
+  }
+
+    
 
     /*movercerdo();
     girar();
     movercerdo2();
     girar2();*/
+}
+
+function hablar()
+{
+    if(KeyE.isDown && cd==0 && mensaje==0 && inicio==0)
+    {
+        texto = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto');
+        texto.setScale(0.3);
+        cd=100;
+        mensaje=1;
+        inicio=1;
+    }
+}
+
+function pasar()    
+{
+    if(SPACE.isDown && mensaje==1)
+    {
+        texto.destroy();
+        scoreText.destroy();
+        texto2 = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto2');
+        texto2.setScale(0.3);
+        cd2=200;
+        mensaje=0;
+        finalconversacion=false;
+    }   
+}
+
+function interaccion()
+{
+    if(scorecd<=0)
+    {
+        scoreText = this.add.text(NPC.x-220, NPC.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
+        scorecd=100;
+        cd3=0;
+    }
 }
 
 function recolectar(objeto1, objeto2)
@@ -251,7 +367,7 @@ function hablar()
 {
     if(KeyE.isDown && cd==0 && mensaje==0 && inicio==0)
     {
-        texto = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto');
+        texto = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto');
         texto.setScale(0.3);
         cd=100;
         mensaje=1;
@@ -262,11 +378,11 @@ function hablar()
 //Funcion para pasar de frase
 function pasar()
 {
-    if(SPACE.isDown && mensaje==1)
+    if(ATTACK.isDown && mensaje==1)
     {
         texto.destroy();
         scoreText.destroy();
-        texto2 = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto2');
+        texto2 = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto2');
         texto2.setScale(0.3);
         cd2=200;
         mensaje=0;
@@ -279,8 +395,17 @@ function interaccion()
 {
     if(scorecd<=0)
     {
-        scoreText = this.add.text(NPC.x-220, NPC.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
+        scoreText = this.add.text(ayudante.x-220, ayudante.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
         scorecd=100;
         cd3=0;
     }
+}
+
+function destruir()
+{
+    scoreText.destroy();
+    texto2.destroy();
+    inicio=0;
+    cd3=1;
+    finalconversacion=true;
 }

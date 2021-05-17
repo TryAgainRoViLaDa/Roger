@@ -1,7 +1,7 @@
 var config = {
     type: Phaser.AUTO,
-    width:600,
-    height:400,
+    width:800,
+    height:600,
     physics:{
         default:'arcade',
         arcade:{
@@ -37,6 +37,8 @@ var dirfle=1;
 
 var finalconversacion=true;
 
+
+//Funcion de cargar imagenes y el
 function preload() {
 
     this.load.image('gameTiles', 'tileset/NatureTileset.png');
@@ -63,77 +65,110 @@ function preload() {
 
     this.load.image('ayudante', 'assets/ayudante.png');
 
+    this.load.image('toma', 'assets/toma.png');
+
+
 
 }
    
-function create() {
+function create() 
+{
 
-    map = this.make.tilemap({key:'tilemap'});
 
-    tileset = map.addTilesetImage('nature','gameTiles');
+  //Colisiones de mapa //
+  map = this.make.tilemap({key:'tilemap'});
+  tileset = map.addTilesetImage('nature','gameTiles');
+  capa = map.createDynamicLayer(0, tileset);
 
-    capa = map.createDynamicLayer(0, tileset);
 
-    obstaculos = map.createDynamicLayer(1, tileset);
-    obstaculos.setCollisionByProperty({colisiones: true});
+  //Creando jugador//
+  player = this.physics.add.sprite(100,100, 'attack').setScale(0.08);
+  player.setBounce(0.2);
+  player.setCollideWorldBounds(true);
+  
 
-    KeyA=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    KeyD=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-    KeyW=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-    KeyS=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    ATTACK=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    KeyE=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
-    DISPARAR=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+  //Colisiones de obstaculos//
+  obstaculos = map.createDynamicLayer(1, tileset);
+  obstaculos.setCollisionByProperty({colisiones: true});
+  this.physics.add.collider(player, obstaculos);
+  
 
-    player = this.physics.add.sprite(100,100, 'attack').setScale(0.08);
-
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
-
-    this.anims.create({
-        key:'attack',
-        frames: this.anims.generateFrameNames('attack', {
-            prefix: 'attack',
+  //Creando animaciones del jugador//
+  this.anims.create(
+  {
+    key:'attack',
+    frames: this.anims.generateFrameNames('attack', 
+    {
+      prefix: 'attack',
             star: 0,
             end: 10,
-        }),
-        repeat:0,
-        frameRate:15
-    });
+    }),
+    repeat:0,
+    frameRate:15
+  });
 
-    cartera = this.add.sprite(40,50,'moneda').setScale(0.1);
+    this.anims.create(
+  {
+    key:'toma',
+    frames: this.anims.generateFrameNames('toma', 
+    {
+      prefix: 'toma',
+            star: 0,
+            end: 10,
+    }),
+    repeat:0,
+    frameRate:15
+  });
 
-    monedaList = this.physics.add.group();
 
-    this.physics.add.overlap(player, monedaList, recolectar, null, this);
+  //Teclas usadas//
+  KeyA=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+  KeyD=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+  KeyW=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+  KeyS=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+  ATTACK=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  KeyE=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+  DISPARAR=this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
 
-    scoreText = this.add.text(70, 50,+ dinero, { fontSize: '20px', fill: 'white' });
 
-    cerdo1 = this.physics.add.sprite(420,100,'cerdo').setScale(0.2);
-    this.physics.add.overlap(player, cerdo1, ataque1, null, this);
+  //Creando grupos//
+  monedaList = this.physics.add.group();
 
-    cerdo2 = this.physics.add.sprite(420,170,'cerdo').setScale(0.1);
-    this.physics.add.overlap(player, cerdo2, ataque2, null, this);
 
-    boss = this.physics.add.sprite(1300,2000,'boss').setScale(0.8);
-    this.physics.add.overlap(player, boss, ataque1, null, this);
+  //Creando sprites//
+  cartera = this.add.sprite(40,50,'moneda').setScale(0.1);
+  cerdo1 = this.physics.add.sprite(420,100,'cerdo').setScale(0.2);
+  cerdo2 = this.physics.add.sprite(420,170,'cerdo').setScale(0.1);
+  boss = this.physics.add.sprite(1300,2000,'boss').setScale(0.8);
+  inventario = this.add.sprite(700,80, 'inventario').setScale(0.3);
+  chuleta = this.add.sprite(595,40, 'chuleta').setScale(0.3);
+  ayudante = this.physics.add.sprite(1800,1800, 'ayudante').setScale(0.2);
 
-    this.cameras.main.setBounds(0, 0, 1280 * 2, 1280 * 2);
-    this.physics.world.setBounds(0, 0, 1280 * 2, 1280 * 2);
-    this.cameras.main.startFollow(player, true, 0.05, 0.05);
 
-    inventario = this.add.sprite(700,80, 'inventario').setScale(0.3);
-    chuleta = this.add.sprite(595,40, 'chuleta').setScale(0.3);
-    scoreText1 = this.add.text(605, 45,+ chuleta, { fontSize: '20px', fill: 'white' });
 
-    ayudante = this.physics.add.sprite(1800,1800, 'ayudante');
-    ayudante.setScale(0.2);
+  //Creando overlaps//
+  this.physics.add.overlap(player, monedaList, recolectar, null, this);
+  this.physics.add.overlap(player, cerdo1, ataque1, null, this);
+  this.physics.add.overlap(player, cerdo2, ataque2, null, this);
+  this.physics.add.overlap(player, boss, ataque1, null, this);
+  this.physics.add.overlap(player, ayudante, interaccion, null, this);
+  this.physics.add.overlap(player, ayudante, hablar, null, this);
+  this.physics.add.overlap(player, ayudante, pasar, null, this);
 
-    this.physics.add.overlap(player, ayudante, interaccion, null, this);
-    this.physics.add.overlap(player, ayudante, hablar, null, this);
-    this.physics.add.overlap(player, ayudante, pasar, null, this);
 
-    this.physics.add.collider(player, obstaculos);
+
+  //Creando textos//
+  scoreText = this.add.text(70, 50,+ dinero, { fontSize: '20px', fill: 'white' });
+  scoreText1 = this.add.text(605, 45,+ chuleta, { fontSize: '20px', fill: 'white' });
+
+
+    
+  //Configuracion de la camara//
+  this.cameras.main.setBounds(0, 0, 1280 * 2, 1280 * 2);
+  this.physics.world.setBounds(0, 0, 1280 * 2, 1280 * 2);
+  this.cameras.main.startFollow(player, true, 0.05, 0.05);
+
+   
 }
 
 function update()
@@ -185,37 +220,43 @@ function update()
         }
     } 
 
-	if (DISPARAR.isDown & cd4==0)
+    
+    if (DISPARAR.isDown)
+    {
+        player.play('toma');
+    }
+
+	/*if (DISPARAR.isDown & cd4==0)
 	{
     
 
      if (KeyA.isDown )
     {
-       disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
-       disparo.angle=230;
-       disparo.setVelocityX(-400);
+       toma=this.physics.add.sprite(player.x,player.y,'toma').setScale(0.05)
+       toma.angle=230;
+       toma.setVelocityX(-400);
        cd4=150;
     }
     else if(KeyD.isDown)
     {
-      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
-      disparo.angle=50;
-        disparo.setVelocityX(400);
+      toma=this.physics.add.sprite(player.x,player.y,'toma').setScale(0.05)
+      toma.angle=50;
+        toma.setVelocityX(400);
         cd4=150;
     }
   
    else if (KeyW.isDown)
     {
-      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
-        disparo.setVelocityY(-400);
+      toma=this.physics.add.sprite(player.x,player.y,'toma').setScale(0.05)
+        toma.setVelocityY(-400);
         cd4=150;
     }
     else if (KeyS.isDown)
     {
-      disparo=this.physics.add.sprite(player.x,player.y,'disparo').setScale(0.05)
-        disparo.setVelocityY(400);
+      toma=this.physics.add.sprite(player.x,player.y,'toma').setScale(0.05)
+        toma.setVelocityY(400);
         cd4=150;
-    }
+    }/*
 
   }
 
@@ -231,7 +272,7 @@ function hablar()
 {
     if(KeyE.isDown && cd==0 && mensaje==0 && inicio==0)
     {
-        texto = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto');
+        texto = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto');
         texto.setScale(0.3);
         cd=100;
         mensaje=1;
@@ -241,11 +282,11 @@ function hablar()
 
 function pasar()    
 {
-    if(SPACE.isDown && mensaje==1)
+    if(ATTACK.isDown && mensaje==1)
     {
         texto.destroy();
         scoreText.destroy();
-        texto2 = this.physics.add.sprite(NPC.x+50, NPC.y-100, 'texto2');
+        texto2 = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto2');
         texto2.setScale(0.3);
         cd2=200;
         mensaje=0;
@@ -257,11 +298,21 @@ function interaccion()
 {
     if(scorecd<=0)
     {
-        scoreText = this.add.text(NPC.x-220, NPC.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
+        scoreText = this.add.text(ayudante.x-220, ayudante.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
         scorecd=100;
         cd3=0;
     }
 }
+
+function destruir()
+{
+    scoreText.destroy();
+    texto2.destroy();
+    inicio=0;
+    cd3=1;
+    finalconversacion=true;
+} 
+
 
 function recolectar(objeto1, objeto2)
 {
@@ -273,6 +324,7 @@ function recolectar(objeto1, objeto2)
     scoreText1 = scoreText1.setText(+ comida);
 }
 
+
 function recolectar2(objeto1, objeto2)
 {
     objeto2.destroy();
@@ -283,6 +335,9 @@ function recolectar2(objeto1, objeto2)
     scoreText1 = scoreText1.setText(+ comida);
 }
 
+
+
+
 function ataque1(objeto1, objeto2)
 {
     if(ATTACK.isDown)
@@ -291,6 +346,8 @@ function ataque1(objeto1, objeto2)
         var moneda2 = monedaList.create(cerdo1.x,boss.y,'moneda').setScale(0.1);
     }
 }
+
+
 
 function ataque2(objeto1, objeto2)
 {
@@ -301,6 +358,8 @@ function ataque2(objeto1, objeto2)
     }
 }
 
+
+
 function ataque3(objeto1, objeto2)
 {
     if(ATTACK.isDown)
@@ -309,6 +368,9 @@ function ataque3(objeto1, objeto2)
         var moneda2 = monedaList.create(boss.x,boss.y,'moneda').setScale(0.1);
     }
 }
+
+
+
 /*function movercerdo()
 {  
     if(direccion1==1)
@@ -363,49 +425,5 @@ function girar2()
     }
 }*/
 
-function hablar()
-{
-    if(KeyE.isDown && cd==0 && mensaje==0 && inicio==0)
-    {
-        texto = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto');
-        texto.setScale(0.3);
-        cd=100;
-        mensaje=1;
-        inicio=1;
-    }
-}
 
-//Funcion para pasar de frase
-function pasar()
-{
-    if(ATTACK.isDown && mensaje==1)
-    {
-        texto.destroy();
-        scoreText.destroy();
-        texto2 = this.physics.add.sprite(ayudante.x+50, ayudante.y-100, 'texto2');
-        texto2.setScale(0.3);
-        cd2=200;
-        mensaje=0;
-        finalconversacion=false;
-    }
-}
 
-//Funcion para que aparezca el texto de ayuda 
-function interaccion()
-{
-    if(scorecd<=0)
-    {
-        scoreText = this.add.text(ayudante.x-220, ayudante.y + 50, 'Pulsa E para hablar y SPACE para continuar', { fontSize: '20px', fill: 'white' });
-        scorecd=100;
-        cd3=0;
-    }
-}
-
-function destruir()
-{
-    scoreText.destroy();
-    texto2.destroy();
-    inicio=0;
-    cd3=1;
-    finalconversacion=true;
-}
